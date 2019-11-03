@@ -1,5 +1,6 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+// const webpack = require('webpack');
 const isProduction = process.env.NODE_ENV === 'production';
 
 module.exports = {
@@ -77,6 +78,10 @@ module.exports = {
 		]
 	},
 	plugins: [
+		// new webpack.ProvidePlugin({
+		// 	$: 'jquery',
+		// 	jQuery: 'jquery'
+		// }),
 		new MiniCssExtractPlugin({
 			filename: 'css/app.css'
 		})
