@@ -1,21 +1,32 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-// const webpack = require('webpack');
-const isProduction = process.env.NODE_ENV === 'production';
+const WebpackNotifierPlugin = require('webpack-notifier');
+const CompressionPlugin = require('compression-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const ManifestPlugin = require('webpack-manifest-plugin');
+const webpack = require('webpack');
+const devMode = process.env.NODE_ENV !== 'production';
+const MinifyPlugin = require('babel-minify-webpack-plugin');
+// Babel minify options
+const minifyOpts = {};
+const pluginOpts = {
+	test: /\.js($|\?)/i,
+	sourceMap: "source-map"
+};
 
 module.exports = {
-	mode: isProduction ? 'production' : 'development',
-	devtool: isProduction ? false : 'source-map',
-	entry: [
-		'./src/assets/js/app.js',
-		'./src/assets/sass/app.scss'
-	],
+	mode: devMode ? "development" : "production",
+	// devtool: devMode ? "source-map" : false,
+	devtool: false,
+	entry: {
+		app: ["./src/assets/sass/app.scss", "./src/assets/js/app.js"]
+	},
 	output: {
-		filename: 'js/app.js',
-		path: path.resolve(__dirname, 'dist')
+		filename: "js/[name].js",
+		path: path.resolve(__dirname, "dist")
 	},
 	devServer: {
-		contentBase: './dist'
+		contentBase: "./dist"
 	},
 	module: {
 		rules: [
@@ -23,18 +34,15 @@ module.exports = {
 				test: /\.js$/,
 				exclude: /node_modules/,
 				use: {
-					loader: 'babel-loader',
+					loader: "babel-loader",
 					options: {
-						presets: ['@babel/preset-env']
+						presets: ["@babel/preset-env"]
 					}
 				}
 			},
 			{
 				test: /\.css$/,
-				use: [
-					'style-loader',
-					'css-loader'
-				]
+				use: ["style-loader", "css-loader"]
 			},
 			{
 				test: /\.s[ac]ss$/,
@@ -46,19 +54,19 @@ module.exports = {
 						}
 					},
 					// 'style-loader',
-					'css-loader',
-					'sass-loader',
-					'postcss-loader'
+					"css-loader",
+					"postcss-loader",
+					"sass-loader"
 				]
 			},
 			{
 				test: /\.(png|jpg|jpeg|gif|bmp|svg)/,
 				use: [
 					{
-						loader: 'file-loader',
+						loader: "file-loader",
 						options: {
-							name: 'images/[name].[hash:8].[ext]',
-							publicPath: '../'
+							name: "images/[name].[hash:8].[ext]",
+							publicPath: "../"
 						}
 					}
 				]
@@ -67,10 +75,10 @@ module.exports = {
 				test: /\.(ttf|woff|woff2|eot|otf)$/,
 				use: [
 					{
-						loader: 'file-loader',
+						loader: "file-loader",
 						options: {
-							name: 'fonts/[name].[hash:8].[ext]',
-							publicPath: '../'
+							name: "fonts/[name].[hash:8].[ext]",
+							publicPath: "../"
 						}
 					}
 				]
@@ -82,8 +90,23 @@ module.exports = {
 		// 	$: 'jquery',
 		// 	jQuery: 'jquery'
 		// }),
+		new webpack.SourceMapDevToolPlugin({
+			filename: "[file].map",
+			// publicPath: "https://example.com/project/",
+			// fileContext: "public"
+		}),
+		new CleanWebpackPlugin({
+			cleanStaleWebpackAssets: false
+		}),
 		new MiniCssExtractPlugin({
-			filename: 'css/app.css'
-		})
+			filename: "css/[name].css"
+		}),
+		new MinifyPlugin(minifyOpts, pluginOpts),
+		new WebpackNotifierPlugin(),
+		new CompressionPlugin({
+			test: /\.(js|css)$/,
+			filename: "[path].gz[query]"
+		}),
+		new ManifestPlugin({ filter: ({ isInitial }) => isInitial })
 	]
 };
