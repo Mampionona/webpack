@@ -1,7 +1,4 @@
 const path = require('path');
-const WebpackNotifierPlugin = require('webpack-notifier');
-const CompressionPlugin = require('compression-webpack-plugin');
-const ManifestPlugin = require('webpack-manifest-plugin');
 const devMode = process.env.NODE_ENV !== 'production';
 const plugins = require('./plugins');
 const rules = require('./rules');
